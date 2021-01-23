@@ -1,13 +1,8 @@
-[error] sbt.librarymanagement.ResolveException: Error downloading org.apache.spark:spark-sql-kafka-0-10_2.13:2.2.2
+[error] sbt.librarymanagement.ResolveException: Error downloading org.apache.spark:spark-streaming-kafka-0-10_2.11_2.11:2.4.7
 [error]   Not found
 [error]   Not found
-[error]   not found: /home/oskarro/.ivy2/localorg.apache.spark/spark-sql-kafka-0-10_2.13/2.2.2/ivys/ivy.xml
-[error]   not found: https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.13/2.2.2/spark-sql-kafka-0-10_2.13-2.2.2.pom
-[error] Error downloading org.apache.spark:spark-sql_2.13:2.2.2
-[error]   Not found
-[error]   Not found
-[error]   not found: /home/oskarro/.ivy2/localorg.apache.spark/spark-sql_2.13/2.2.2/ivys/ivy.xml
-[error]   not found: https://repo1.maven.org/maven2/org/apache/spark/spark-sql_2.13/2.2.2/spark-sql_2.13-2.2.2.pom
+[error]   not found: /home/oskarro/.ivy2/localorg.apache.spark/spark-streaming-kafka-0-10_2.11_2.11/2.4.7/ivys/ivy.xml
+[error]   not found: https://repo1.maven.org/maven2/org/apache/spark/spark-streaming-kafka-0-10_2.11_2.11/2.4.7/spark-streaming-kafka-0-10_2.11_2.11-2.4.7.pom
 [error] 	at lmcoursier.CoursierDependencyResolution.unresolvedWarningOrThrow(CoursierDependencyResolution.scala:258)
 [error] 	at lmcoursier.CoursierDependencyResolution.$anonfun$update$38(CoursierDependencyResolution.scala:227)
 [error] 	at scala.util.Either$LeftProjection.map(Either.scala:573)
@@ -38,13 +33,8 @@
 [error] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
 [error] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
 [error] 	at java.base/java.lang.Thread.run(Thread.java:834)
-[error] (ssExtractDependencies) sbt.librarymanagement.ResolveException: Error downloading org.apache.spark:spark-sql-kafka-0-10_2.13:2.2.2
+[error] (ssExtractDependencies) sbt.librarymanagement.ResolveException: Error downloading org.apache.spark:spark-streaming-kafka-0-10_2.11_2.11:2.4.7
 [error]   Not found
 [error]   Not found
-[error]   not found: /home/oskarro/.ivy2/localorg.apache.spark/spark-sql-kafka-0-10_2.13/2.2.2/ivys/ivy.xml
-[error]   not found: https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.13/2.2.2/spark-sql-kafka-0-10_2.13-2.2.2.pom
-[error] Error downloading org.apache.spark:spark-sql_2.13:2.2.2
-[error]   Not found
-[error]   Not found
-[error]   not found: /home/oskarro/.ivy2/localorg.apache.spark/spark-sql_2.13/2.2.2/ivys/ivy.xml
-[error]   not found: https://repo1.maven.org/maven2/org/apache/spark/spark-sql_2.13/2.2.2/spark-sql_2.13-2.2.2.pom
+[error]   not found: /home/oskarro/.ivy2/localorg.apache.spark/spark-streaming-kafka-0-10_2.11_2.11/2.4.7/ivys/ivy.xml
+[error]   not found: https://repo1.maven.org/maven2/org/apache/spark/spark-streaming-kafka-0-10_2.11_2.11/2.4.7/spark-streaming-kafka-0-10_2.11_2.11-2.4.7.pom

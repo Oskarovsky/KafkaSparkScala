@@ -3,16 +3,19 @@ version := "0.1"
 scalaVersion := "2.11.12"
 val projectName = "KafkaSparkScala"
 
-
 val sparkVersion = "2.2.2"
 
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-library" % scalaVersion.value,
 
+//  "org.apache.spark" %% "spark-streaming" % sparkVersion,
   "org.apache.spark" %% "spark-sql" % sparkVersion,
   "org.apache.spark" %% "spark-sql-kafka-0-10" % sparkVersion
 )
 
+libraryDependencies += "org.apache.kafka" %% "kafka" % "2.0.0"
+
+libraryDependencies += "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.12.1"
 libraryDependencies += "com.lihaoyi" %% "ujson" % "0.7.1"
 libraryDependencies += "com.lihaoyi" %% "requests" % "0.1.8"
 libraryDependencies += "io.spray" %% "spray-json" % "1.3.5"
