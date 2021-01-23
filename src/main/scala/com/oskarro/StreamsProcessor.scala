@@ -1,11 +1,8 @@
 package com.oskarro
 
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{col, from_json}
-import org.apache.spark.sql.types.{IntegerType, StringType, StructType}
-
-import java.util.Properties
+import org.apache.spark.sql.types.StructType
 
 class StreamsProcessor(brokers: String) {
 
@@ -13,19 +10,20 @@ class StreamsProcessor(brokers: String) {
 
     val spark = SparkSession
       .builder()
-      .appName("kafka-tutorials")
+      .appName("Kafka-Spark-Scala")
       .master("local[*]")
       .getOrCreate()
 
-    val props: Properties = new Properties()
-    props.put("bootstrap.servers","localhost:9092")
-    props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-    props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-    props.put("acks","all")
+    val data = spark.sparkContext.parallelize(
+      Seq("I like Spark", "Spark is awesome", "My first Spark job is working now and is counting down these words")
+    )
+    val filtered = data.filter(line => line.contains("awesome"))
+    filtered.collect().foreach(print)
 
-    val producer = new KafkaProducer[String, String](props)
 
-    try {
+    val producer = new KafkaProducer[String, String](Constants.properties)
+
+/*    try {
       for (i <- 0 to 15) {
         val record = new ProducerRecord[String, String](Constants.oskarTopic, i.toString, "My Site is sparkbyexamples.com " + i)
         val metadata = producer.send(record)
@@ -38,10 +36,15 @@ class StreamsProcessor(brokers: String) {
       case e: Exception => e.printStackTrace()
     } finally {
       producer.close()
-    }
+    }*/
 
 
-    import spark.implicits._
+
+
+
+
+    val schema = StructType
+
 
     val df = spark.readStream
       .format("kafka")
@@ -50,6 +53,8 @@ class StreamsProcessor(brokers: String) {
       .option("startingOffsets", "earliest")
       .load()
 
+
+    Thread.sleep(300000)
 
 
 /*    df.selectExpr()

@@ -1,5 +1,6 @@
-package com.oskarro
+package com.oskarro.spark
 
+import com.oskarro.Constants
 import net.liftweb.json.DefaultFormats
 import net.liftweb.json.JsonParser.parse
 import net.liftweb.json.Serialization.write
@@ -10,13 +11,6 @@ import java.util.{Calendar, Properties}
 import scala.concurrent.duration.DurationInt
 
 object MainSparkProducer {
-
-  val props = new Properties()
-  props.put("bootstrap.servers", "localhost:9092")
-  props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserialization")
-  props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserialization")
-  props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-  props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
 
   val apiKey: String = "3b168711-aefd-4825-973a-4e1526c6ce93"
   val resourceID: String = "2e5503e-927d-4ad3-9500-4ab9e55deb59"
@@ -62,7 +56,7 @@ object MainSparkProducer {
     vehicleList foreach {
       veh =>
         KafkaSparkProducer
-          .writeToKafka(infoAboutProcess, "temat_oskar01", MainSparkProducer.props, write(veh))
+          .writeToKafka(infoAboutProcess, "temat_oskar01", Constants.properties, write(veh))
     }
 
   }

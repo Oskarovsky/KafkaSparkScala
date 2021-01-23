@@ -1,15 +1,14 @@
-package com.oskarro
+package com.oskarro.spark
 
+import com.oskarro.Constants
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 
 import java.util.Properties
 
 object KafkaSparkProducer {
 
-  val properties = new Properties()
-  properties.setProperty("bootstrap.servers", "localhost:9092")
 
-  def writeToKafka(info: String, topic: String, props: Properties = properties, content: String): Unit = {
+  def writeToKafka(info: String, topic: String, props: Properties = Constants.properties, content: String): Unit = {
 
     // Send data on Kafka topic
     val producer = new KafkaProducer[String, String](props)
