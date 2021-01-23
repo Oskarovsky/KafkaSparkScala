@@ -1,6 +1,5 @@
 package com.oskarro.spark
 
-import com.oskarro.Constants
 import net.liftweb.json.DefaultFormats
 import net.liftweb.json.JsonParser.parse
 import net.liftweb.json.Serialization.write
