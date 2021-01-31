@@ -23,7 +23,10 @@ object KafkaSparkConsumer {
   case class BusStreamData(Lines: Double, Lon: Double, VehicleNumber: Double, Time: String, Lat: Double, Brigade: Double)
 
   def main(args: Array[String]): Unit = {
+    readKafkaMessage("sdsd", Constants.properties)
+  }
 
+  def readKafkaMessage(topic: String, properties: Properties): Unit = {
     val spark = SparkSession
       .builder()
       .appName(appName)
@@ -63,20 +66,15 @@ object KafkaSparkConsumer {
       .trigger(Trigger.ProcessingTime("5 seconds"))
       .foreachBatch { (batchDF: DataFrame, batchID: Long) =>
         println(s"Writing to cassandra...")
-/*        batchDF.write
-          .cassandraFormat("bus_stream", "stuff") // table, keyspace
-          .mode("append")
-          .save()*/
+        /*        batchDF.write
+                  .cassandraFormat("bus_stream", "stuff") // table, keyspace
+                  .mode("append")
+                  .save()*/
       }
       .outputMode("update")
       .format("console")
       .start()
       .awaitTermination()
-
-  }
-
-  def readKafkaMessage(topic: String, properties: Properties): Unit = {
-    //TODO
   }
 
 }
