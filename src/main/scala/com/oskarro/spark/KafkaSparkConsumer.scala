@@ -64,13 +64,13 @@ object KafkaSparkConsumer {
     val query = summaryWithIDs
       .writeStream
       .trigger(Trigger.ProcessingTime("5 seconds"))
-      .foreachBatch { (batchDF: DataFrame, batchID: Long) =>
+/*      .foreachBatch { (batchDF: DataFrame, batchID: Long) =>
         println(s"Writing to cassandra...")
-        /*        batchDF.write
+                batchDF.write
                   .cassandraFormat("bus_stream", "stuff") // table, keyspace
                   .mode("append")
-                  .save()*/
-      }
+                  .save()
+      }*/
       .outputMode("update")
       .format("console")
       .start()
