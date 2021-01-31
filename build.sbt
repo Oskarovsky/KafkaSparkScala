@@ -10,7 +10,7 @@ libraryDependencies ++= Seq(
 
 //  "org.apache.spark" %% "spark-streaming" % sparkVersion,
   "org.apache.spark" %% "spark-sql" % sparkVersion,
-  "org.apache.spark" %% "spark-sql-kafka-0-10" % sparkVersion
+  "org.apache.spark" %% "spark-sql-kafka-0-10" % sparkVersion,
 )
 
 libraryDependencies += "org.apache.kafka" %% "kafka" % "2.0.0"
@@ -25,3 +25,6 @@ libraryDependencies += "net.liftweb" %% "lift-json" % "2.6-M4"
 libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.4.2"
 
 libraryDependencies += "com.typesafe.akka" % "akka-actor_2.11" % "2.5.32"
+
+libraryDependencies += "com.datastax.spark" %% "spark-cassandra-connector" % "2.4.3"
+libraryDependencies += "com.datastax.cassandra" % "cassandra-driver-core" % "4.0.0"
