@@ -1,10 +1,15 @@
 package com.oskarro.spark
 
+import akka.actor.ProviderSelection.Cluster
+import com.datastax.oss.driver.api.core.uuid.Uuids
 import com.oskarro.Constants
 import com.oskarro.training.SimpleApp.{appName, masterValue}
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.from_json
+import org.apache.spark.sql.cassandra.DataFrameWriterWrapper
+import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.functions.{from_json, udf}
+import org.apache.spark.sql.streaming.Trigger
 import org.apache.spark.sql.types.{StringType, StructType}
+import org.apache.spark.sql._
 
 import java.util.Properties
 
@@ -15,12 +20,14 @@ object KafkaSparkConsumer {
   val logFile = "/home/oskarro/Developer/BigData/xxx/abc.txt" // Should be some file on your system
 
   case class BusStream(Lines: String, Lon: String, VehicleNumber: String, Time: String, Lat: String, Brigade: String)
+  case class BusStreamData(Lines: Double, Lon: Double, VehicleNumber: Double, Time: String, Lat: Double, Brigade: Double)
 
   def main(args: Array[String]): Unit = {
 
     val spark = SparkSession
       .builder()
       .appName(appName)
+      .config("spark.casandra.connection.host", "localhost")
       .master(masterValue)
       .getOrCreate()
 
@@ -47,12 +54,24 @@ object KafkaSparkConsumer {
       .withColumn("traffic", from_json($"value".cast(StringType), jsonSchema))
       .selectExpr("traffic.*", "partition", "offset")
 
-    val query = trafficStream
+    val makeUUID = udf(() => Uuids.timeBased().toString)
+
+    val summaryWithIDs = trafficStream.withColumn("uuid", makeUUID())
+
+    val query = summaryWithIDs
       .writeStream
+      .trigger(Trigger.ProcessingTime("5 seconds"))
+      .foreachBatch { (batchDF: DataFrame, batchID: Long) =>
+        println(s"Writing to cassandra...")
+/*        batchDF.write
+          .cassandraFormat("bus_stream", "stuff") // table, keyspace
+          .mode("append")
+          .save()*/
+      }
       .outputMode("update")
       .format("console")
-
-    query.start() .awaitTermination()
+      .start()
+      .awaitTermination()
 
   }
 

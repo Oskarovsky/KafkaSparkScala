@@ -3,7 +3,7 @@ version := "0.1"
 scalaVersion := "2.11.12"
 val projectName = "KafkaSparkScala"
 
-val sparkVersion = "2.2.2"
+val sparkVersion = "2.4.2"
 
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-library" % scalaVersion.value,
@@ -25,6 +25,8 @@ libraryDependencies += "net.liftweb" %% "lift-json" % "2.6-M4"
 libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.4.2"
 
 libraryDependencies += "com.typesafe.akka" % "akka-actor_2.11" % "2.5.32"
+
+libraryDependencies += "io.dropwizard.metrics" % "metrics-jmx" % "4.0.2"
 
 libraryDependencies += "com.datastax.spark" %% "spark-cassandra-connector" % "2.4.3"
 libraryDependencies += "com.datastax.cassandra" % "cassandra-driver-core" % "4.0.0"
