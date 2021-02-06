@@ -3,6 +3,7 @@ package com.oskarro.spark
 import com.datastax.oss.driver.api.core.uuid.Uuids
 import com.oskarro.Constants
 import com.oskarro.spark.KafkaSparkConsumer.{appName, masterValue}
+import org.apache.spark.sql.cassandra.DataFrameWriterWrapper
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.{from_json, udf}
 import org.apache.spark.sql.streaming.Trigger
@@ -35,12 +36,12 @@ object MainSparkConsumer {
       import spark.implicits._
 
       val jsonSchema = new StructType()
-        .add("Lines", "string")
-        .add("Lon", "string")
-        .add("VehicleNumber", "string")
-        .add("Time", "string")
-        .add("Lat", "string")
-        .add("Brigade", "string")
+        .add("line", "string")
+        .add("lon", "string")
+        .add("vehicle_number", "string")
+        .add("time", "string")
+        .add("lat", "string")
+        .add("brigade", "string")
 
       val inputDf = spark
         .readStream
@@ -60,17 +61,26 @@ object MainSparkConsumer {
       val query = summaryWithIDs
         .writeStream
         .trigger(Trigger.ProcessingTime("5 seconds"))
-        .foreachBatch { (batchDF: DataFrame, batchID: Long) =>
-          println(s"Writing to cassandra...")
-          /*        batchDF.write
-                    .cassandraFormat("bus_stream", "stuff") // table, keyspace
-                    .mode("append")
-                    .save()*/
+        .foreachBatch { (batchDF, batchID: Long) =>
+          println(s"Writing to cassandra $batchID")
+          batchDF.write
+            .cassandraFormat("bus_stream", "warszawa") // table, keyspace
+            .mode("append")
+            .save()
         }
         .outputMode("update")
-        .format("console")
+//        .format("console")
         .start()
-        .awaitTermination()
-    }
-}
 
+    query.awaitTermination()
+
+    }
+
+
+  /*    summaryWithIDs.write
+      .format("org.apache.spark.sql.cassandra")
+      .option("keyspace", "stuff")
+      .option("table", "bus_stream")
+      .mode("append")
+      .save()*/
+}
