@@ -5,7 +5,7 @@ import com.oskarro.Constants
 import com.oskarro.spark.KafkaSparkConsumer.{appName, masterValue}
 import org.apache.spark.sql.cassandra.DataFrameWriterWrapper
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions.{from_json, udf}
+import org.apache.spark.sql.functions.{from_json, to_timestamp, udf}
 import org.apache.spark.sql.streaming.Trigger
 import org.apache.spark.sql.types.{StringType, StructType}
 
@@ -24,31 +24,32 @@ object MainSparkConsumer {
 
 
   def readCurrentLocationOfVehicles(topic: String, properties: Properties): Unit = {
-      val spark = SparkSession
-        .builder()
-        .appName(appName)
-        .config("spark.casandra.connection.host", "localhost")
-        .master(masterValue)
-        .getOrCreate()
 
-      spark.sparkContext.setLogLevel("ERROR")
+    val spark = SparkSession
+      .builder()
+      .appName(appName)
+      .config("spark.casandra.connection.host", "localhost")
+      .master(masterValue)
+      .getOrCreate()
 
-      import spark.implicits._
+    spark.sparkContext.setLogLevel("ERROR")
 
-      val jsonSchema = new StructType()
-        .add("line", "string")
-        .add("lon", "string")
-        .add("vehicle_number", "string")
-        .add("time", "string")
-        .add("lat", "string")
-        .add("brigade", "string")
+    import spark.implicits._
 
-      val inputDf = spark
-        .readStream
-        .format("kafka")
-        .option("kafka.bootstrap.servers", "localhost:9092")
-        .option("subscribe", Constants.oskarTopic)
-        .load()
+    val jsonSchema = new StructType()
+      .add("Lines", "string")
+      .add("Lon", "string")
+      .add("VehicleNumber", "string")
+      .add("Time", "string")
+      .add("Lat", "string")
+      .add("Brigade", "string")
+
+    val inputDf = spark
+      .readStream
+      .format("kafka")
+      .option("kafka.bootstrap.servers", "localhost:9092")
+      .option("subscribe", Constants.oskarTopic)
+      .load()
 
       val trafficStream = inputDf
         .withColumn("traffic", from_json($"value".cast(StringType), jsonSchema))
@@ -56,15 +57,18 @@ object MainSparkConsumer {
 
       val makeUUID = udf(() => Uuids.timeBased().toString)
 
-      val summaryWithIDs = trafficStream.withColumn("uuid", makeUUID())
+      val summaryWithIDs = trafficStream
+        .withColumn("uuid", makeUUID())
+        .withColumn("Time", to_timestamp($"time"))
+
 
       val query = summaryWithIDs
         .writeStream
         .trigger(Trigger.ProcessingTime("5 seconds"))
-        .foreachBatch { (batchDF, batchID: Long) =>
+        .foreachBatch { (batchDF: DataFrame, batchID: Long) =>
           println(s"Writing to cassandra $batchID")
           batchDF.write
-            .cassandraFormat("bus_stream", "warszawa") // table, keyspace
+            .cassandraFormat("bus_stream", "metrics") // table, keyspace
             .mode("append")
             .save()
         }
@@ -73,7 +77,6 @@ object MainSparkConsumer {
         .start()
 
     query.awaitTermination()
-
     }
 
 
