@@ -1,9 +1,11 @@
 package com.oskarro.spark
 
 import com.oskarro.Constants
+import com.oskarro.Constants.{apiKey, resourceID}
 import net.liftweb.json.DefaultFormats
 import net.liftweb.json.JsonParser.parse
 import net.liftweb.json.Serialization.write
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import play.api.libs.json.Json
 
 import java.text.SimpleDateFormat
@@ -11,9 +13,6 @@ import java.util.{Calendar, Properties}
 import scala.concurrent.duration.DurationInt
 
 object MainSparkProducer {
-
-  val apiKey: String = "3b168711-aefd-4825-973a-4e1526c6ce93"
-  val resourceID: String = "2e5503e-927d-4ad3-9500-4ab9e55deb59"
 
   def main(args: Array[String]): Unit = {
     val system = akka.actor.ActorSystem("system")
@@ -24,6 +23,14 @@ object MainSparkProducer {
     system.scheduler.schedule(2 seconds, 6 seconds) {
       produceCurrentLocationOfVehicles("tram")
     }
+  }
+
+  def writeToKafka(info: String, topic: String, props: Properties = Constants.properties, content: String): Unit = {
+    // Send data on Kafka topic
+    val producer = new KafkaProducer[String, String](props)
+    val record = new ProducerRecord[String, String](topic, content)
+    producer.send(record)
+    producer.close()
   }
 
   def produceCurrentLocationOfVehicles(vehicleType: String): Unit = {
@@ -55,8 +62,7 @@ object MainSparkProducer {
     val infoAboutProcess: String = s"[PROCESS: $vehicleType localization]"
     vehicleList foreach {
       veh =>
-        KafkaSparkProducer
-          .writeToKafka(infoAboutProcess, "temat_oskar01", Constants.properties, write(veh))
+          writeToKafka(infoAboutProcess, "temat_oskar01", Constants.properties, write(veh))
     }
 
   }

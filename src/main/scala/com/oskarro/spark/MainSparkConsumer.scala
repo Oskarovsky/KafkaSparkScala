@@ -2,7 +2,7 @@ package com.oskarro.spark
 
 import com.datastax.oss.driver.api.core.uuid.Uuids
 import com.oskarro.Constants
-import com.oskarro.spark.KafkaSparkConsumer.{appName, masterValue}
+import com.oskarro.Constants.masterValue
 import org.apache.spark.sql.cassandra.DataFrameWriterWrapper
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.{from_json, to_timestamp, udf}
@@ -13,23 +13,19 @@ import java.util.Properties
 
 object MainSparkConsumer {
 
-  val apiKey: String = "3b168711-aefd-4825-973a-4e1526c6ce93"
-  val resourceID: String = "2e5503e-927d-4ad3-9500-4ab9e55deb59"
-
   case class BusStream(Lines: String, Lon: Double, VehicleNumber: String, Time: String, Lat: Double, Brigade: String)
 
   def main(args: Array[String]): Unit = {
-    readCurrentLocationOfVehicles("temat_oskar01", Constants.properties)
+    readCurrentLocationOfVehicles(Constants.oskarTopic01, Constants.properties)
   }
 
 
   def readCurrentLocationOfVehicles(topic: String, properties: Properties): Unit = {
-
     val spark = SparkSession
       .builder()
-      .appName(appName)
+      .appName(Constants.appName)
       .config("spark.casandra.connection.host", "localhost")
-      .master(masterValue)
+      .master(Constants.masterValue)
       .getOrCreate()
 
     spark.sparkContext.setLogLevel("ERROR")
@@ -48,7 +44,7 @@ object MainSparkConsumer {
       .readStream
       .format("kafka")
       .option("kafka.bootstrap.servers", "localhost:9092")
-      .option("subscribe", Constants.oskarTopic)
+      .option("subscribe", Constants.oskarTopic01)
       .load()
 
       val trafficStream = inputDf
@@ -68,7 +64,7 @@ object MainSparkConsumer {
         .foreachBatch { (batchDF: DataFrame, batchID: Long) =>
           println(s"Writing to cassandra $batchID")
           batchDF.write
-            .cassandraFormat("bus_stream", "metrics") // table, keyspace
+            .cassandraFormat("bus_stream_spark", "wawa") // table, keyspace
             .mode("append")
             .save()
         }
