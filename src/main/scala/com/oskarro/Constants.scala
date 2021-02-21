@@ -5,7 +5,7 @@ import java.util.Properties
 
 object Constants {
 
-  var appName: String = "TrainingApp"
+  var appName: String = "KafkaSparkApp"
   var masterValue: String = "local[1]"
   var logFile = "/home/oskarro/Developer/BigData/xxx/abc.txt" // Should be some file on your system
 

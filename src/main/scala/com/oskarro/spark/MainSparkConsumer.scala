@@ -2,18 +2,17 @@ package com.oskarro.spark
 
 import com.datastax.oss.driver.api.core.uuid.Uuids
 import com.oskarro.Constants
-import com.oskarro.Constants.masterValue
 import org.apache.spark.sql.cassandra.DataFrameWriterWrapper
-import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.{from_json, to_timestamp, udf}
 import org.apache.spark.sql.streaming.Trigger
 import org.apache.spark.sql.types.{StringType, StructType}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import java.util.Properties
 
 object MainSparkConsumer {
 
-  case class BusStream(Lines: String, Lon: Double, VehicleNumber: String, Time: String, Lat: Double, Brigade: String)
+  case class BusModel(Lines: String, Lon: Double, VehicleNumber: String, Time: String, Lat: Double, Brigade: String)
 
   def main(args: Array[String]): Unit = {
     readCurrentLocationOfVehicles(Constants.oskarTopic01, Constants.properties)
