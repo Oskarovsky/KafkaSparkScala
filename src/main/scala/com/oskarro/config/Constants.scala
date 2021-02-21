@@ -1,4 +1,4 @@
-package com.oskarro
+package com.oskarro.config
 
 import java.time.format.DateTimeFormatter
 import java.util.Properties
@@ -9,7 +9,7 @@ object Constants {
   var masterValue: String = "local[1]"
   var logFile = "/home/oskarro/Developer/BigData/xxx/abc.txt" // Should be some file on your system
 
-  var oskarTopic01 = "temat_oskar01"
+  var busTopic01 = "busTopic01"
 
   val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 

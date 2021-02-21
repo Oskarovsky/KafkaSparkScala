@@ -1,7 +1,8 @@
 package com.oskarro.spark
 
-import com.oskarro.Constants
-import com.oskarro.Constants.{apiKey, resourceID}
+import com.oskarro.services.KafkaService
+import com.oskarro.config.Constants.{apiKey, resourceID}
+import com.oskarro.config.Constants
 import com.oskarro.enums.VehicleType
 import com.oskarro.enums.VehicleType.VehicleType
 import com.oskarro.model.BusModel
@@ -17,6 +18,8 @@ import scala.concurrent.duration.DurationInt
 
 object MainSparkProducer {
 
+  val kafkaService = new KafkaService()
+
   def main(args: Array[String]): Unit = {
     val system = akka.actor.ActorSystem("system")
     import system.dispatcher
@@ -26,22 +29,6 @@ object MainSparkProducer {
     system.scheduler.schedule(2 seconds, 6 seconds) {
       produceCurrentLocationOfVehicles(VehicleType.tram)
     }
-  }
-
-  /**
-   * Send data to kafka topic with specific configurations
-   * run locally with 4 cores, or "spark://master:7077" to run on a Spark standalone cluster.
-   *
-   * @param info is a string with basic information for client,
-   * @param topic contains topic name,
-   * @param props defines configuration,
-   * @param content is sending on a topic
-   */
-  def writeToKafka(info: String, topic: String, props: Properties = Constants.properties, content: String): Unit = {
-    val producer = new KafkaProducer[String, String](props)
-    val record = new ProducerRecord[String, String](topic, content)
-    producer.send(record)
-    producer.close()
   }
 
 
@@ -67,7 +54,7 @@ object MainSparkProducer {
     val infoAboutProcess: String = s"[PROCESS: $vehicleType localization]"
     vehicleList foreach {
       veh =>
-          writeToKafka(infoAboutProcess, "temat_oskar01", Constants.properties, write(veh))
+          kafkaService.writeToKafka(infoAboutProcess, Constants.busTopic01, Constants.properties, write(veh))
     }
 
   }

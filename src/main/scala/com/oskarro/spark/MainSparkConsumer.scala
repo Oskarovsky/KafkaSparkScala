@@ -1,25 +1,28 @@
 package com.oskarro.spark
 
 import com.datastax.oss.driver.api.core.uuid.Uuids
-import com.oskarro.Constants
+import com.oskarro.config.Constants
 import org.apache.spark.sql.cassandra.DataFrameWriterWrapper
 import org.apache.spark.sql.functions.{from_json, to_timestamp, udf}
 import org.apache.spark.sql.streaming.Trigger
 import org.apache.spark.sql.types.{StringType, StructType}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-import java.util.Properties
-
 object MainSparkConsumer {
 
   case class BusModel(Lines: String, Lon: Double, VehicleNumber: String, Time: String, Lat: Double, Brigade: String)
 
   def main(args: Array[String]): Unit = {
-    readCurrentLocationOfVehicles(Constants.oskarTopic01, Constants.properties)
+    readCurrentLocationOfVehicles(
+      Constants.busTopic01,
+      "localhost:9092",
+      "wawa",
+      "bus_stream_spark")
   }
 
 
-  def readCurrentLocationOfVehicles(topic: String, properties: Properties): Unit = {
+  def readCurrentLocationOfVehicles(topic: String, kafkaServers: String,
+                                    cassandraKeyspace: String, cassandraTable: String): Unit = {
     val spark = SparkSession
       .builder()
       .appName(Constants.appName)
@@ -42,8 +45,8 @@ object MainSparkConsumer {
     val inputDf = spark
       .readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", "localhost:9092")
-      .option("subscribe", Constants.oskarTopic01)
+      .option("kafka.bootstrap.servers", kafkaServers)
+      .option("subscribe", topic)
       .load()
 
       val trafficStream = inputDf
@@ -63,7 +66,7 @@ object MainSparkConsumer {
         .foreachBatch { (batchDF: DataFrame, batchID: Long) =>
           println(s"Writing to cassandra $batchID")
           batchDF.write
-            .cassandraFormat("bus_stream_spark", "wawa") // table, keyspace
+            .cassandraFormat(cassandraTable, cassandraKeyspace)
             .mode("append")
             .save()
         }
@@ -73,12 +76,4 @@ object MainSparkConsumer {
 
     query.awaitTermination()
     }
-
-
-  /*    summaryWithIDs.write
-      .format("org.apache.spark.sql.cassandra")
-      .option("keyspace", "stuff")
-      .option("table", "bus_stream")
-      .mode("append")
-      .save()*/
 }
