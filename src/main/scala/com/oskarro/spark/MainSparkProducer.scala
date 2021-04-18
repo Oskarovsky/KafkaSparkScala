@@ -44,7 +44,9 @@ object MainSparkProducer {
       params = Map(
         "resource_id" -> resourceID,
         "apikey" -> apiKey,
-        "type" -> vehicleType.id.toString))
+        "type" -> vehicleType.id.toString
+      )
+    )
 
     val jsonObjectFromString = Json.parse(req.text)
     val response = jsonObjectFromString \ "result"
