@@ -6,10 +6,10 @@ import java.util.Properties
 object Constants {
 
   var appName: String = "KafkaSparkApp"
-  var masterValue: String = "local[1]"
+  var masterValue: String = "local[4]"
   var logFile = "/home/oskarro/Developer/BigData/xxx/abc.txt" // Should be some file on your system
 
-  var busTopic01 = "busTopic01"
+  var busTopic01 = "temat_bus01"
 
   val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
