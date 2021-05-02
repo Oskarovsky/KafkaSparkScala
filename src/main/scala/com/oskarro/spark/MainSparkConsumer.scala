@@ -5,7 +5,9 @@ import com.oskarro.config.Constants
 import com.oskarro.model.BusModel
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.SparkConf
+import org.apache.spark.sql.cassandra.DataFrameWriterWrapper
 import org.apache.spark.sql.functions.{col, expr, from_json, to_timestamp, udf}
+import org.apache.spark.sql.streaming.Trigger
 import org.apache.spark.sql.types.{StringType, StructField, StructType, TimestampType}
 import org.apache.spark.sql.{DataFrame, ForeachWriter, Row, SparkSession}
 
@@ -20,7 +22,7 @@ object MainSparkConsumer {
       Constants.busTopic01,
       "localhost:9092",
       "transport",
-      "bus_spark2")
+      "bus_spark_ride")
   }
 
   var stateMap: Map[String, BusModel] = Map[String, BusModel]()
@@ -58,15 +60,6 @@ object MainSparkConsumer {
       StructField(name = "Brigade", dataType = StringType, nullable = true)
     ))
 
-//    @Deprecated("StructType object has been replaced with newer version")
-    val jsonSchema = new StructType()
-      .add("Lines", "string")
-      .add("Lon", "string")
-      .add("VehicleNumber", "string")
-      .add("Time", "timestamp")
-      .add("Lat", "string")
-      .add("Brigade", "string")
-
     val trafficStream = inputDf
       .withColumn("traffic", from_json($"value".cast(StringType), json))
       .selectExpr("traffic.*", "Partition", "Offset")
@@ -75,7 +68,7 @@ object MainSparkConsumer {
     val summaryWithIDs = trafficStream
       .withColumn("Uuid", makeUUID())
       .withColumn("Time", to_timestamp($"Time"))
-      .withColumn("Timestamp", to_timestamp($"Time"))
+//      .withColumn("Timestamp", to_timestamp($"Time"))
 
 
     def updateBusModel(input: BusModel): Unit = {
@@ -83,11 +76,11 @@ object MainSparkConsumer {
         // TODO
       }
       if (stateMap.contains(input.VehicleNumber)) {
-        println(s"Update model: ${input.VehicleNumber}")
+//        println(s"Update model: ${input.VehicleNumber}")
         val maybeModel = stateMap(input.VehicleNumber)
         stateMap = stateMap + (input.VehicleNumber -> maybeModel)
       } else {
-        println(s"Add model: ${input.VehicleNumber}")
+//        println(s"Add model: ${input.VehicleNumber}")
         stateMap = stateMap + (input.VehicleNumber -> input)
       }
     }
@@ -142,16 +135,10 @@ object MainSparkConsumer {
                               Lat: Double,
                               Brigade: String): Double = {
       updateBusModel(BusModel(Lines, Lon, VehicleNumber, Time, Lat, Brigade))
-      println(s"Check $VehicleNumber - ${stateMap.contains(VehicleNumber)}")
+//      println(s"Check $VehicleNumber - ${stateMap.contains(VehicleNumber)}")
       if (stateMap.contains(VehicleNumber)) {
         val busModelPrev: BusModel = stateMap(VehicleNumber)
-        val dystans = calculateDistance(busModelPrev, Lat, Lon)
-        val tajm = calculateDuration(busModelPrev.Time, Time)
-        val spid = calculateSpeed(dystans, tajm)
-        println(s"DYSTANS:  $dystans")
-//        println(s"CZAS:  $tajm")
-        println(s"SPEED:  $spid")
-        dystans
+        calculateDistance(busModelPrev, Lat, Lon)
       } else {
         println("OJ BIDA BIDA...")
         12
@@ -163,7 +150,7 @@ object MainSparkConsumer {
       if (stateMap.contains(VehicleNumber)) {
         val busModelPrev: BusModel = stateMap(VehicleNumber)
         val tajm = calculateDuration(busModelPrev.Time, Time)
-        println(s"CZAS:  $tajm")
+//        println(s"CZAS:  $tajm")
         tajm
       } else {
         0
@@ -222,14 +209,21 @@ object MainSparkConsumer {
         calculateSpeedUdf($"distance", $"duration")
       )
       .writeStream
+      .trigger(Trigger.ProcessingTime("5 seconds"))
       .option("truncate", value = false)
 //      .foreach(writer)
       .foreachBatch { (batchDF: DataFrame, batchID: Long) =>
-        batchDF.show(20)
-        batchDF.collect()
+        batchDF.write
+          .cassandraFormat(cassandraTable, cassandraKeyspace)
+          .mode("append")
+          .save()
+//        batchDF.show(20)
+//        batchDF.collect()
       }
+      .outputMode("update")
+//      .format("console")
       .start()
-    query.awaitTermination()
+      .awaitTermination()
   }
 
 }
