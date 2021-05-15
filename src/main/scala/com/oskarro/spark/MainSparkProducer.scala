@@ -1,19 +1,19 @@
 package com.oskarro.spark
 
-import com.oskarro.services.KafkaService
-import com.oskarro.config.Constants.{apiKey, resourceID}
 import com.oskarro.config.Constants
+import com.oskarro.config.Constants.{apiKey, resourceID}
 import com.oskarro.enums.VehicleType
 import com.oskarro.enums.VehicleType.VehicleType
 import com.oskarro.model.BusModel
+import com.oskarro.services.KafkaService
+
 import net.liftweb.json.DefaultFormats
 import net.liftweb.json.JsonParser.parse
 import net.liftweb.json.Serialization.write
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import play.api.libs.json.Json
 
 import java.text.SimpleDateFormat
-import java.util.{Calendar, Properties}
+import java.util.Calendar
 import scala.concurrent.duration.DurationInt
 
 object MainSparkProducer {
@@ -58,7 +58,6 @@ object MainSparkProducer {
       veh =>
           kafkaService.writeToKafka(infoAboutProcess, Constants.busTopic01, Constants.properties, write(veh))
     }
-
   }
 
 }
